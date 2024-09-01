@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\SubjectController;
@@ -41,6 +43,18 @@ Route::middleware(['auth', 'verified'])->prefix('rooms')->group(function () {
     Route::get('/', [RoomController::class, 'index'])->name('rooms.index');
     Route::get('create', [RoomController::class, 'create'])->name('rooms.create');
     Route::get('edit/{room}', [RoomController::class, 'edit'])->name('rooms.edit');
+});
+
+Route::middleware(['auth', 'verified'])->prefix('departments')->group(function () {
+    Route::get('/', [DepartmentController::class, 'index'])->name('departments.index');
+    Route::get('create', [DepartmentController::class, 'create'])->name('departments.create');
+    Route::get('edit/{department}', [DepartmentController::class, 'edit'])->name('departments.edit');
+});
+
+Route::middleware(['auth', 'verified'])->prefix('groups')->group(function () {
+    Route::get('/', [GroupController::class, 'index'])->name('groups.index');
+    Route::get('create', [GroupController::class, 'create'])->name('groups.create');
+    Route::get('edit/{group}', [GroupController::class, 'edit'])->name('groups.edit');
 });
 
 require __DIR__.'/auth.php';

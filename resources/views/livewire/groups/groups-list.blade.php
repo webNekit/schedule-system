@@ -5,8 +5,18 @@
         </div>
     @endif
 
+    <div class="flex items-center mb-4">
+        <label for="departmentFilter" class="mr-2 text-sm font-medium text-gray-700">Фильтр по кафедре</label>
+        <select wire:model.live="department" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="all">Все кафедры</option>
+            @foreach($departments as $department)
+                <option value="{{ $department->id }}">{{ $department->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
     <div class="overflow-x-auto">
-        @if($rooms->isEmpty())
+        @if($groups->isEmpty())
             <p class="text-gray-500 text-center py-4">{{ __('Таблица пуста') }}</p>
         @else
             <table class="min-w-full bg-white border border-gray-200">
@@ -17,12 +27,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($rooms as $room)
+                    @foreach($groups as $group)
                         <tr>
-                            <td class="py-2 px-4 border-b border-gray-200">{{ $room->name }}</td>
+                            <td class="py-2 px-4 border-b border-gray-200">{{ $group->name }}</td>
                             <td class="py-2 px-4 border-b border-gray-200">
-                                <a href="{{ route('rooms.edit', $room->id) }}" class="text-yellow-500 hover:underline">{{ __('Редактировать') }}</a>
-                                <button wire:click="delete({{ $room->id }})" class="text-red-500 hover:underline ml-2">{{ __('Удалить') }}</button>
+                                <a href="{{ route('groups.edit', $group->id) }}" class="text-yellow-500 hover:underline">{{ __('Редактировать') }}</a>
+                                <button wire:click="delete({{ $group->id }})" class="text-red-500 hover:underline ml-2">{{ __('Удалить') }}</button>
                             </td>
                         </tr>
                     @endforeach
@@ -32,6 +42,6 @@
     </div>
 
     <div class="mt-4">
-        {{ $rooms->links() }}
+        {{ $groups->links() }}
     </div>
 </div>

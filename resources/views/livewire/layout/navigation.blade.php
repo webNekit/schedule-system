@@ -39,11 +39,17 @@ new class extends Component
                     <x-nav-link :href="route('subjects.index')" :active="request()->routeIs('subjects.index')" wire:navigate>
                         {{ __('Дисциплины') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('departments.index')" :active="request()->routeIs('departments.index')" wire:navigate>
+                        {{ __('Кафедры') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('teachers.index')" :active="request()->routeIs('teachers.index')" wire:navigate>
                         {{ __('Преподаватели') }}
                     </x-nav-link>
                     <x-nav-link :href="route('rooms.index')" :active="request()->routeIs('rooms.index')" wire:navigate>
                         {{ __('Кабинеты') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('groups.index')" :active="request()->routeIs('groups.index')" wire:navigate>
+                        {{ __('Группы') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -102,12 +108,19 @@ new class extends Component
             <x-responsive-nav-link :href="route('subjects.index')" :active="request()->routeIs('subjects.index')" wire:navigate>
                 {{ __('Дисциплины') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('departments.index')" :active="request()->routeIs('departments.index')" wire:navigate>
+                {{ __('Кафедры') }}
+            </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('teachers.index')" :active="request()->routeIs('teachers.index')" wire:navigate>
                 {{ __('Преподаватели') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('rooms.index')" :active="request()->routeIs('rooms.index')" wire:navigate>
                 {{ __('Кабинеты') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('groups.index')" :active="request()->routeIs('groups.index')" wire:navigate>
+                {{ __('Группы') }}
+            </x-responsive-nav-link>
+
         </div>
 
         <!-- Responsive Settings Options -->
