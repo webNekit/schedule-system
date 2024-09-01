@@ -39,6 +39,12 @@ new class extends Component
                     <x-nav-link :href="route('subjects.index')" :active="request()->routeIs('subjects.index')" wire:navigate>
                         {{ __('Дисциплины') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('teachers.index')" :active="request()->routeIs('teachers.index')" wire:navigate>
+                        {{ __('Преподаватели') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('rooms.index')" :active="request()->routeIs('rooms.index')" wire:navigate>
+                        {{ __('Кабинеты') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -95,6 +101,12 @@ new class extends Component
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('subjects.index')" :active="request()->routeIs('subjects.index')" wire:navigate>
                 {{ __('Дисциплины') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('teachers.index')" :active="request()->routeIs('teachers.index')" wire:navigate>
+                {{ __('Преподаватели') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('rooms.index')" :active="request()->routeIs('rooms.index')" wire:navigate>
+                {{ __('Кабинеты') }}
             </x-responsive-nav-link>
         </div>
 
