@@ -36,6 +36,9 @@ new class extends Component
                     <x-nav-link :href="route('semesters.index')" :active="request()->routeIs('semesters.index')" wire:navigate>
                         {{ __('Семестры') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('subjects.index')" :active="request()->routeIs('subjects.index')" wire:navigate>
+                        {{ __('Дисциплины') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -89,6 +92,9 @@ new class extends Component
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('semesters.index')" :active="request()->routeIs('semesters.index')" wire:navigate>
                 {{ __('Семестры') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('subjects.index')" :active="request()->routeIs('subjects.index')" wire:navigate>
+                {{ __('Дисциплины') }}
             </x-responsive-nav-link>
         </div>
 
