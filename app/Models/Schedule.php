@@ -8,41 +8,27 @@ use Illuminate\Database\Eloquent\Model;
 class Schedule extends Model
 {
     use HasFactory;
-    protected $fillable = ['subject_id', 'teacher_id', 'room_id', 'group_id', 'semester_id'];
+    protected $fillable = [
+        'workday_id', 'department_id', 'group_id', 'lesson_id', 'is_active', 'is_archive'
+    ];
 
-    // Связь с дисциплиной
-    public function subject()
+    public function workday()
     {
-        return $this->belongsTo(Subject::class);
+        return $this->belongsTo(Workday::class);
     }
 
-    // Связь с преподавателем
-    public function teacher()
+    public function department()
     {
-        return $this->belongsTo(Teacher::class);
+        return $this->belongsTo(Department::class);
     }
 
-    // Связь с кабинетом
-    public function room()
-    {
-        return $this->belongsTo(Room::class);
-    }
-
-    // Связь с группой
     public function group()
     {
         return $this->belongsTo(Group::class);
     }
 
-    // Связь с семестром
-    public function semester()
+    public function lesson()
     {
-        return $this->belongsTo(Semester::class);
-    }
-
-    // Связь с расписанием слотов
-    public function slots()
-    {
-        return $this->hasMany(ScheduleSlot::class);
+        return $this->belongsTo(Lesson::class);
     }
 }

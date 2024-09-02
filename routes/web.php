@@ -3,9 +3,11 @@
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\WorkdayController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
@@ -56,5 +58,19 @@ Route::middleware(['auth', 'verified'])->prefix('groups')->group(function () {
     Route::get('create', [GroupController::class, 'create'])->name('groups.create');
     Route::get('edit/{group}', [GroupController::class, 'edit'])->name('groups.edit');
 });
+
+Route::middleware(['auth', 'verified'])->prefix('workdays')->group(function () {
+    Route::get('/', [WorkdayController::class, 'index'])->name('workdays.index');
+    Route::get('create', [WorkdayController::class, 'create'])->name('workdays.create');
+    Route::get('edit/{workday}', [WorkdayController::class, 'edit'])->name('workdays.edit');
+});
+
+
+Route::middleware(['auth', 'verified'])->prefix('schedules')->group(function () {
+    Route::get('/', [ScheduleController::class, 'index'])->name('schedules.index');
+    Route::get('create', [ScheduleController::class, 'create'])->name('schedules.create');
+    Route::get('edit/{schedule}', [ScheduleController::class, 'edit'])->name('schedules.edit');
+});
+
 
 require __DIR__.'/auth.php';

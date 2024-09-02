@@ -33,23 +33,8 @@ new class extends Component
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Главная') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('semesters.index')" :active="request()->routeIs('semesters.index')" wire:navigate>
-                        {{ __('Семестры') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('subjects.index')" :active="request()->routeIs('subjects.index')" wire:navigate>
-                        {{ __('Дисциплины') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('departments.index')" :active="request()->routeIs('departments.index')" wire:navigate>
-                        {{ __('Кафедры') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('teachers.index')" :active="request()->routeIs('teachers.index')" wire:navigate>
-                        {{ __('Преподаватели') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('rooms.index')" :active="request()->routeIs('rooms.index')" wire:navigate>
-                        {{ __('Кабинеты') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('groups.index')" :active="request()->routeIs('groups.index')" wire:navigate>
-                        {{ __('Группы') }}
+                    <x-nav-link :href="route('schedules.index')" :active="request()->routeIs('schedules.index')" wire:navigate>
+                        {{ __('Расписание') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -92,6 +77,43 @@ new class extends Component
                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
+            </div>
+        </div>
+    </div>
+    <div class="w-full border-t border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <!-- Logo -->
+                    <div class="shrink-0 flex items-center">
+                        <div class="text-black text-md font-medium">Справочные разделы:</div>
+                    </div>
+    
+                    <!-- Navigation Links -->
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('workdays.index')" :active="request()->routeIs('workdays.index')" wire:navigate>
+                            {{ __('Рабочие дни') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('semesters.index')" :active="request()->routeIs('semesters.index')" wire:navigate>
+                            {{ __('Семестры') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('subjects.index')" :active="request()->routeIs('subjects.index')" wire:navigate>
+                            {{ __('Дисциплины') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('departments.index')" :active="request()->routeIs('departments.index')" wire:navigate>
+                            {{ __('Кафедры') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('teachers.index')" :active="request()->routeIs('teachers.index')" wire:navigate>
+                            {{ __('Преподаватели') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('rooms.index')" :active="request()->routeIs('rooms.index')" wire:navigate>
+                            {{ __('Кабинеты') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('groups.index')" :active="request()->routeIs('groups.index')" wire:navigate>
+                            {{ __('Группы') }}
+                        </x-nav-link>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
