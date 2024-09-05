@@ -52,6 +52,13 @@ class GroupsList extends Component
         $this->resetPage(); // Сбросить пагинацию после удаления
     }
 
+    // Метод для обновления часов
+    public function resetWeeklyHours()
+    {
+        Group::query()->update(['weekly_hours' => 36]); // Обновить поле weekly_hours для всех групп
+        session()->flash('message', 'Часы успешно обновлены.');
+    }
+
     public function render()
     {
         return view('livewire.groups.groups-list', [

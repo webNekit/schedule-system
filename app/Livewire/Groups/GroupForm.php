@@ -30,12 +30,19 @@ class GroupForm extends Component
 
         $this->group->name = $this->name;
         $this->group->department_id = $this->department_id;
+
+        // Устанавливаем значение по умолчанию для weekly_hours при создании новой группы
+        if (!$this->group->exists) {
+            $this->group->weekly_hours = 36; // Значение по умолчанию
+        }
+
         $this->group->save();
 
         session()->flash('message', $this->group->exists ? 'Группа успешно обновлена.' : 'Группа успешно добавлена.');
 
         return redirect()->route('groups.index');
     }
+
 
     public function render()
     {

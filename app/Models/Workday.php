@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Workday extends Model
 {
     use HasFactory;
-    protected $fillable = ['date'];
+    protected $fillable = ['date', 'is_active'];
 
     public function schedules()
     {

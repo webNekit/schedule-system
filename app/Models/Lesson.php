@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Lesson extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         '1_subject_id', '1_teacher_id', '1_room_id', '1_is_empty',
         '2_subject_id', '2_teacher_id', '2_room_id', '2_is_empty',
@@ -17,51 +18,31 @@ class Lesson extends Model
         '6_subject_id', '6_teacher_id', '6_room_id', '6_is_empty',
         '7_subject_id', '7_teacher_id', '7_room_id', '7_is_empty',
     ];
+
     public function schedules()
     {
         return $this->hasMany(Schedule::class);
     }
 
-    // Связи с таблицами предметов, преподавателей и кабинетов
-    public function subjects()
+    public function __call($method, $parameters)
     {
-        return $this->belongsToMany(Subject::class, 'subjects', 'id', 'id')
-            ->whereIn('id', [
-                $this->{'1_subject_id'},
-                $this->{'2_subject_id'},
-                $this->{'3_subject_id'},
-                $this->{'4_subject_id'},
-                $this->{'5_subject_id'},
-                $this->{'6_subject_id'},
-                $this->{'7_subject_id'},
-            ]);
-    }
+        // Проверка, что метод начинается с "subject", "teacher" или "room"
+        if (preg_match('/^(subject|teacher|room)(\d+)$/', $method, $matches)) {
+            $type = $matches[1];
+            $index = $matches[2];
+            
+            // Создание связей для предметов, преподавателей и кабинетов
+            if (in_array($type, ['subject', 'teacher', 'room']) && is_numeric($index)) {
+                $idColumn = "{$index}_{$type}_id";
+                
+                // Определяем правильный класс для связи
+                $relatedClass = ucfirst($type);
+                $relatedModelClass = "App\\Models\\{$relatedClass}";
 
-    public function teachers()
-    {
-        return $this->belongsToMany(Teacher::class, 'teachers', 'id', 'id')
-            ->whereIn('id', [
-                $this->{'1_teacher_id'},
-                $this->{'2_teacher_id'},
-                $this->{'3_teacher_id'},
-                $this->{'4_teacher_id'},
-                $this->{'5_teacher_id'},
-                $this->{'6_teacher_id'},
-                $this->{'7_teacher_id'},
-            ]);
-    }
-
-    public function rooms()
-    {
-        return $this->belongsToMany(Room::class, 'rooms', 'id', 'id')
-            ->whereIn('id', [
-                $this->{'1_room_id'},
-                $this->{'2_room_id'},
-                $this->{'3_room_id'},
-                $this->{'4_room_id'},
-                $this->{'5_room_id'},
-                $this->{'6_room_id'},
-                $this->{'7_room_id'},
-            ]);
+                return $this->belongsTo($relatedModelClass, $idColumn);
+            }
+        }
+        
+        return parent::__call($method, $parameters);
     }
 }

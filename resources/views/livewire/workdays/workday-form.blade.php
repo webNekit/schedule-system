@@ -11,6 +11,10 @@
             <input type="date" id="name" wire:model="date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
             @error('date') <span class="text-red-600">{{ $message }}</span> @enderror
         </div>
+        <div class="mb-4">
+            <label for="is_active" class="block text-gray-700">Активен:</label>
+            <input type="checkbox" wire:model="is_active" id="is_active" class="form-checkbox h-5 w-5 text-indigo-600">
+        </div>        
 
         <div class="mt-4">
             <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">

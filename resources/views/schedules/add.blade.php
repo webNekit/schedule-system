@@ -9,15 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <livewire:schedules.schedule-create 
-                    :departments="$departments" 
-                    :groups="$groups" 
-                    :subjects="$subjects" 
-                    :teachers="$teachers" 
-                    :rooms="$rooms" 
-                    :workdays="$workdays" 
-                />
-
+                    <livewire:schedules.schedule-form :workday-id="$workdayId" :workday-date="$workdayDate" />
                 </div>
             </div>
         </div>

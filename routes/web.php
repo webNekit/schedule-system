@@ -4,6 +4,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\ScheduleTableController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
@@ -69,8 +70,13 @@ Route::middleware(['auth', 'verified'])->prefix('workdays')->group(function () {
 Route::middleware(['auth', 'verified'])->prefix('schedules')->group(function () {
     Route::get('/', [ScheduleController::class, 'index'])->name('schedules.index');
     Route::get('create', [ScheduleController::class, 'create'])->name('schedules.create');
-    Route::get('edit/{schedule}', [ScheduleController::class, 'edit'])->name('schedules.edit');
+    // Route::get('edit/{schedule}', [ScheduleController::class, 'edit'])->name('schedules.edit');
+    // В маршруте, используем идентификаторы, чтобы передать их в контроллер
+    Route::get('edit/{schedule}/{departmentId}/{groupId}/{lessonId}', [ScheduleController::class, 'edit'])->name('schedules.edit');
+
 });
+
+Route::get('/preview', [ScheduleTableController::class, 'index'])->name('preview');
 
 
 require __DIR__.'/auth.php';

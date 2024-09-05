@@ -2,7 +2,7 @@
     <form wire:submit.prevent="save" class="space-y-4">
         <div>
             <label for="workday_id" class="block text-sm font-medium text-gray-700">Рабочий день</label>
-            <select id="workday_id" wire:model="workday_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+            <select id="workday_id" wire:model.live="workday_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                 <option value="">Выберите рабочий день</option>
                 @foreach($workdays as $workday)
                     <option value="{{ $workday->id }}">{{ $workday->date }}</option>
