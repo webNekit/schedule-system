@@ -73,10 +73,14 @@ Route::middleware(['auth', 'verified'])->prefix('schedules')->group(function () 
     // Route::get('edit/{schedule}', [ScheduleController::class, 'edit'])->name('schedules.edit');
     // В маршруте, используем идентификаторы, чтобы передать их в контроллер
     Route::get('edit/{schedule}/{departmentId}/{groupId}/{lessonId}', [ScheduleController::class, 'edit'])->name('schedules.edit');
+    Route::post('/transfer', [ScheduleController::class, 'transfer'])->name('schedules.transfer');
 
 });
 
-Route::get('/preview', [ScheduleTableController::class, 'index'])->name('preview');
+// Route::get('/preview', [ScheduleTableController::class, 'index'])->name('preview');
+Route::get('/schedules/view/{workdayId}/{departmentId}', [ScheduleTableController::class, 'view'])->name('schedules.view');
+// Route::get('/schedules/table', [ScheduleTableController::class, 'index'])->name('scheduleTable.index');
+
 
 
 require __DIR__.'/auth.php';

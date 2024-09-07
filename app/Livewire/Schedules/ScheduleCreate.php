@@ -24,12 +24,13 @@ class ScheduleCreate extends Component
     public $is_active = false;
     public $is_archive = false;
     public $groups = [];
-    public $subjects;
+    public $subjects = [];
     public $teachers;
     public $rooms;
     public $workdays;
-
+    
     public $remainingHours = [];
+    public $noSubjectsMessage = '';
 
     public function mount()
     {
@@ -38,7 +39,6 @@ class ScheduleCreate extends Component
         $this->teachers = Teacher::all();
         $this->rooms = Room::all();
         $this->workdays = Workday::all();
-        $this->updateSubjects(); // Обновляем список дисциплин
 
         // Инициализация массива уроков с ключами по умолчанию
         for ($i = 1; $i <= 7; $i++) {
@@ -50,8 +50,8 @@ class ScheduleCreate extends Component
             ];
         }
 
-        // Инициализация оставшихся часов
-        $this->updateRemainingHours();
+        $this->updateSubjects(); // Обновляем список дисциплин
+        $this->updateRemainingHours(); // Инициализация оставшихся часов
     }
 
     public function updatedWorkdayId()
@@ -66,13 +66,48 @@ class ScheduleCreate extends Component
         $this->updateGroups(); // Обновляем группы при изменении кафедры
     }
 
+    public function updatedGroupId()
+    {
+        $this->updateSubjects(); // Обновляем список дисциплин при изменении группы
+        $this->initializeEmptyLessons(); // Инициализация пустых уроков
+    }
+
+    public function updatedLessons($value)
+    {
+        $this->updateRemainingHours();
+        $this->updateSubjects(); // Обновляем список дисциплин при изменении пары
+    }
+
     public function updateSubjects()
     {
-        $semesterId = $this->determineCurrentSemester();
-        if ($semesterId) {
-            $this->subjects = Subject::where('semester_id', $semesterId)->get();
+        $semesterId = $this->determineCurrentSemester(); // Определяем текущий семестр
+        if ($semesterId && $this->group_id) {
+            $group = Group::find($this->group_id);
+
+            if ($group) {
+                $subjectIds = is_array($group->subjects_id) ? $group->subjects_id : json_decode($group->subjects_id, true);
+
+                if (is_null($subjectIds)) {
+                    $subjectIds = [];
+                }
+
+                // Получаем дисциплины для выбранной группы, семестра и пары
+                $this->subjects = Subject::whereIn('id', $subjectIds)
+                    ->where('semester_id', $semesterId)
+                    ->get();
+
+                if ($this->subjects->isEmpty()) {
+                    $this->noSubjectsMessage = 'Для выбранной группы нет привязанных дисциплин.';
+                } else {
+                    $this->noSubjectsMessage = ''; // Очистка сообщения
+                }
+            } else {
+                $this->subjects = collect();
+                $this->noSubjectsMessage = 'Для выбранной группы нет привязанных дисциплин.';
+            }
         } else {
-            $this->subjects = collect(); // Очищаем список дисциплин, если семестр не найден
+            $this->subjects = collect();
+            $this->noSubjectsMessage = 'Для выбранной группы нет привязанных дисциплин.';
         }
     }
 
@@ -104,9 +139,16 @@ class ScheduleCreate extends Component
         $this->group_id = null; // Сбросить выбранную группу при изменении кафедры
     }
 
-    public function updatedLessons($value)
+    private function initializeEmptyLessons()
     {
-        $this->updateRemainingHours();
+        for ($i = 1; $i <= 7; $i++) {
+            $this->lessons[$i] = [
+                'subject_id' => null,
+                'teacher_id' => null,
+                'room_id' => null,
+                'is_empty' => false
+            ];
+        }
     }
 
     private function updateRemainingHours()
@@ -163,6 +205,13 @@ class ScheduleCreate extends Component
                 $subject->total_hours = max(0, $subject->total_hours - 2 * $totalLessons);
                 $subject->save();
             }
+        }
+
+        // Уменьшение weekly_hours у группы
+        $group = Group::find($this->group_id);
+        if ($group) {
+            $group->weekly_hours = max(0, $group->weekly_hours - 2 * $totalLessons);
+            $group->save();
         }
 
         // Создание записи в таблице Schedule и привязка к Lesson

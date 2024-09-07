@@ -5,7 +5,7 @@
             <select id="workday_id" wire:model.live="workday_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                 <option value="">Выберите рабочий день</option>
                 @foreach($workdays as $workday)
-                    <option value="{{ $workday->id }}">{{ $workday->date }}</option>
+                    <option value="{{ $workday->id }}">{{ \Carbon\Carbon::parse($workday->date)->format('d.m.y') }}</option>
                 @endforeach
             </select>
             @error('workday_id') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
@@ -31,6 +31,11 @@
                 @endforeach
             </select>
             @error('group_id') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+            @if ($noSubjectsMessage)
+            <div class="text-sm text-red-600">
+                {{ $noSubjectsMessage }}
+            </div>
+        @endif
         </div>
 
         @for ($i = 1; $i <= 7; $i++)

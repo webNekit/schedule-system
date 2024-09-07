@@ -23,6 +23,38 @@
             @error('department_id') <span class="text-red-600">{{ $message }}</span> @enderror
         </div>
 
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700">Дисциплины</label>
+            <div class="mb-4">
+                @foreach($allSubjects as $subject)
+                    <button type="button" wire:click="addSubject({{ $subject->id }})" class="mr-2 mb-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                        {{ $subject->name }}
+                    </button>
+                @endforeach
+            </div>
+
+            <div>
+                @if(count($addedSubjects))
+                    <ul class="list-disc pl-5">
+                        @foreach($addedSubjects as $subjectId)
+                            @php $subject = $allSubjects->find($subjectId); @endphp
+                            @if($subject)
+                                <li class="mb-2">
+                                    {{ $subject->name }}
+                                    <button type="button" wire:click="removeSubject({{ $subject->id }})" class="text-red-500 ml-2">Удалить</button>
+                                </li>
+                            @endif
+                        @endforeach
+                    </ul>
+                @else
+                    <p class="text-gray-500">Нет добавленных дисциплин</p>
+                @endif
+            </div>
+        </div>
+
+        <!-- Скрытое поле для хранения ID дисциплин -->
+        <input type="hidden" wire:model="addedSubjects">
+
         <div class="mt-4">
             <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
                 Сохранить

@@ -19,6 +19,11 @@ class Lesson extends Model
         '7_subject_id', '7_teacher_id', '7_room_id', '7_is_empty',
     ];
 
+    public function room($pairNumber)
+    {
+        return $this->belongsTo(Room::class, "{$pairNumber}_room_id");
+    }
+
     public function schedules()
     {
         return $this->hasMany(Schedule::class);

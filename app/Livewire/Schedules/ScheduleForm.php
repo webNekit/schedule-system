@@ -22,11 +22,11 @@ class ScheduleForm extends Component
     public $lesson_id;
     public $is_active = false;
     public $is_archive = false;
-    public $lessons = []; // Массив для хранения данных уроков
+    public $lessons = [];
 
     public $departments;
     public $groups = [];
-    public $subjects;
+    public $subjects = [];
     public $teachers;
     public $rooms;
     public $workdays;
@@ -35,13 +35,12 @@ class ScheduleForm extends Component
     public $selectedGroup;
     public $selectedLesson;
 
-    public $remainingHours = []; // Остаток часов для выбранных дисциплин
+    public $remainingHours = [];
+    public $noSubjectsMessage = '';
 
-    public function mount($schedule, $departments, $groups, $subjects, $teachers, $rooms, $workdays, $selectedDepartment, $selectedGroup, $selectedLesson)
+    public function mount($schedule, $departments, $teachers, $rooms, $workdays, $selectedDepartment, $selectedGroup, $selectedLesson)
     {
         $this->departments = $departments;
-        $this->groups = $groups;
-        $this->subjects = $subjects;
         $this->teachers = $teachers;
         $this->rooms = $rooms;
         $this->workdays = $workdays;
@@ -59,15 +58,11 @@ class ScheduleForm extends Component
             $this->is_active = $schedule->is_active;
             $this->is_archive = $schedule->is_archive;
 
-            // Определяем семестр и фильтруем дисциплины
-            $semesterId = $this->determineCurrentSemester();
-            if ($semesterId) {
-                $this->subjects = Subject::where('semester_id', $semesterId)->get();
-            } else {
-                $this->subjects = collect(); // Очищаем список дисциплин, если семестр не найден
-            }
+            // Обновляем группы и дисциплины при загрузке компонента
+            $this->groups = Group::where('department_id', $this->department_id)->get();
+            $this->updateSubjects(); // Обновляем дисциплины для выбранной группы
 
-            // Заполняем данные уроков для выбранной группы
+            // Заполняем данные уроков для выбранного занятия
             $this->fillLessons($selectedLesson);
         } else {
             $this->initializeEmptyLessons();
@@ -81,14 +76,59 @@ class ScheduleForm extends Component
     {
         // Когда выбирается другая кафедра, обновляем список групп
         $this->groups = Group::where('department_id', $this->department_id)->get();
-        $this->group_id = null; // Сбросить выбранную группу при изменении кафедры
+        $this->group_id = null;
+        $this->subjects = collect(); // Очищаем список дисциплин
+        $this->noSubjectsMessage = ''; // Очищаем сообщение
+    }
+
+    public function updatedGroupId()
+    {
+        $this->updateSubjects(); // Обновление дисциплин после выбора группы
+        $this->initializeEmptyLessons(); // Инициализация пустых уроков
     }
 
     public function updatedLessons($propertyName)
     {
-        // Обновляем оставшиеся часы при изменении дисциплины
         if (strpos($propertyName, 'lessons.') !== false) {
             $this->recalculateRemainingHours();
+        }
+    }
+
+    private function updateSubjects()
+    {
+        $semesterId = $this->determineCurrentSemester(); // Определяем текущий семестр
+
+        if ($this->group_id && $semesterId) {
+            $group = Group::find($this->group_id);
+
+            if ($group) {
+                // Проверяем, что subjects_id является массивом или пустым массивом
+                $subjectIds = is_array($group->subjects_id) ? $group->subjects_id : json_decode($group->subjects_id, true);
+
+                if (is_null($subjectIds)) {
+                    $subjectIds = [];
+                }
+
+                // Получаем дисциплины для выбранной группы и семестра
+                $this->subjects = Subject::whereIn('id', $subjectIds)
+                    ->where('semester_id', $semesterId)
+                    ->get();
+
+                if ($this->subjects->isEmpty()) {
+                    $this->noSubjectsMessage = 'Для выбранной группы нет привязанных дисциплин.';
+                } else {
+                    $this->noSubjectsMessage = ''; // Очистка сообщения
+                }
+
+                logger()->info('Subjects updated for group_id: ' . $this->group_id, ['subjects' => $this->subjects->toArray()]);
+            } else {
+                $this->subjects = collect();
+                $this->noSubjectsMessage = 'Для выбранной группы нет привязанных дисциплин.';
+                logger()->info('Group not found for group_id: ' . $this->group_id);
+            }
+        } else {
+            $this->subjects = collect();
+            $this->noSubjectsMessage = 'Для выбранной группы нет привязанных дисциплин.';
         }
     }
 
@@ -99,17 +139,15 @@ class ScheduleForm extends Component
                 'subject_id' => $lesson->{"{$i}_subject_id"} ?? null,
                 'teacher_id' => $lesson->{"{$i}_teacher_id"} ?? null,
                 'room_id' => $lesson->{"{$i}_room_id"} ?? null,
-                'is_empty' => (bool)($lesson->{"{$i}_is_empty"} ?? false) // Приведение к булевому типу
+                'is_empty' => (bool)($lesson->{"{$i}_is_empty"} ?? false)
             ];
         }
 
-        // Пересчитываем оставшиеся часы после заполнения уроков
         $this->recalculateRemainingHours();
     }
 
     private function initializeEmptyLessons()
     {
-        // Инициализация пустых данных уроков
         for ($i = 1; $i <= 7; $i++) {
             $this->lessons[$i] = [
                 'subject_id' => null,
@@ -122,42 +160,37 @@ class ScheduleForm extends Component
 
     private function determineCurrentSemester()
     {
-        // Получаем рабочий день
         $workday = Workday::find($this->workday_id);
 
         if (!$workday || !$workday->date) {
-            // Вернуть null, если рабочий день не установлен
             return null;
         }
 
         $workdayDate = new \DateTime($workday->date);
-        $month = $workdayDate->format('m'); // Получаем месяц в формате '01', '02', и т.д.
+        $month = $workdayDate->format('m');
 
-        // Определяем семестр по текущему месяцу
         $semester = Semester::whereMonth('start_date', '<=', $month)
-                            ->whereMonth('end_date', '>=', $month)
-                            ->first();
+            ->whereMonth('end_date', '>=', $month)
+            ->first();
 
         return $semester ? $semester->id : null;
     }
 
     private function recalculateRemainingHours()
     {
-        $this->remainingHours = []; // Очистка старых значений
+        $this->remainingHours = [];
 
         foreach ($this->lessons as $lesson) {
             if (isset($lesson['subject_id']) && !empty($lesson['subject_id'])) {
                 $subjectId = $lesson['subject_id'];
                 $subject = Subject::find($subjectId);
                 if ($subject) {
-                    // Предположим, что дисциплина имеет общее количество часов
                     $totalHours = $subject->total_hours;
                     $hoursBooked = 0;
 
-                    // Пересчитываем количество часов, которые уже добавлены
                     foreach ($this->lessons as $lesson) {
                         if (isset($lesson['subject_id']) && $lesson['subject_id'] === $subjectId) {
-                            $hoursBooked += 2; // Предполагаем, что на каждую пару тратится 2 часа
+                            $hoursBooked += 2;
                         }
                     }
 
@@ -169,6 +202,7 @@ class ScheduleForm extends Component
 
     public function save()
     {
+        // Валидация данных
         $this->validate([
             'workday_id' => 'required|exists:workdays,id',
             'department_id' => 'required|exists:departments,id',
@@ -179,83 +213,70 @@ class ScheduleForm extends Component
             'lessons.*.is_empty' => 'boolean',
         ]);
 
-        // Подготовка данных для создания или обновления записи в таблице Lesson
+        // Подготовка данных для сохранения
         $lessonData = [];
-        $subjectIds = [];
         for ($i = 1; $i <= 7; $i++) {
-            if (!$this->lessons[$i]['is_empty'] && $this->lessons[$i]['subject_id']) {
-                $subjectIds[] = $this->lessons[$i]['subject_id'];
-            }
             $lessonData["{$i}_subject_id"] = $this->lessons[$i]['is_empty'] ? null : $this->lessons[$i]['subject_id'];
             $lessonData["{$i}_teacher_id"] = $this->lessons[$i]['is_empty'] ? null : $this->lessons[$i]['teacher_id'];
             $lessonData["{$i}_room_id"] = $this->lessons[$i]['is_empty'] ? null : $this->lessons[$i]['room_id'];
             $lessonData["{$i}_is_empty"] = $this->lessons[$i]['is_empty'];
         }
 
-        if ($this->schedule) {
-            // Проверяем, если существует текущая запись расписания (schedule)
-            $schedule = Schedule::find($this->schedule->id); // Находим конкретное расписание по его ID
-            if ($schedule) {
-                $lesson = Lesson::find($schedule->lesson_id); // Получаем связанную запись урока
-                if ($lesson) {
-                    $lesson->update($lessonData); // Обновляем существующий урок
-                } else {
-                    $lesson = Lesson::create($lessonData); // Создаем новый урок
-                    $schedule->lesson_id = $lesson->id; // Связываем урок с расписанием
-                }
+        try {
+            if ($this->schedule) {
+                $schedule = Schedule::find($this->schedule->id);
+                if ($schedule) {
+                    // Обновление данных занятия
+                    $lesson = Lesson::find($schedule->lesson_id);
+                    if ($lesson) {
+                        $lesson->update($lessonData);
+                    } else {
+                        // Создание нового занятия
+                        $lesson = Lesson::create($lessonData);
+                        $schedule->lesson_id = $lesson->id;
+                    }
 
-                $schedule->update([
+                    // Обновление расписания
+                    $schedule->update([
+                        'workday_id' => $this->workday_id,
+                        'department_id' => $this->department_id,
+                        'group_id' => $this->group_id,
+                        'is_active' => $this->is_active,
+                        'is_archive' => $this->is_archive,
+                        'lesson_id' => $lesson->id,
+                    ]);
+
+                    session()->flash('success', 'Расписание успешно обновлено.');
+                } else {
+                    session()->flash('error', 'Не удалось найти расписание.');
+                }
+            } else {
+                // Создание нового расписания
+                $lesson = Lesson::create($lessonData);
+
+                $this->schedule = Schedule::create([
                     'workday_id' => $this->workday_id,
                     'department_id' => $this->department_id,
                     'group_id' => $this->group_id,
-                    'lesson_id' => $lesson->id,
                     'is_active' => $this->is_active,
                     'is_archive' => $this->is_archive,
+                    'lesson_id' => $lesson->id,
                 ]);
+
+                session()->flash('success', 'Расписание успешно создано.');
             }
-        } else {
-            $lesson = Lesson::create($lessonData);
-            Schedule::create([
-                'workday_id' => $this->workday_id,
-                'department_id' => $this->department_id,
-                'group_id' => $this->group_id,
-                'lesson_id' => $lesson->id,
-                'is_active' => $this->is_active,
-                'is_archive' => $this->is_archive,
-            ]);
+
+            // Выполнение редиректа
+            return redirect()->route('schedules.index');
+        } catch (\Exception $e) {
+            // Логируем ошибку
+            logger()->error('Ошибка при сохранении расписания', ['error' => $e->getMessage()]);
+            session()->flash('error', 'Произошла ошибка при сохранении расписания.');
         }
-
-        // Обновление оставшихся часов по предметам
-        foreach ($subjectIds as $subjectId) {
-            $subject = Subject::find($subjectId);
-            if ($subject) {
-                $subject->total_hours = max(0, $subject->total_hours - 2);
-                $subject->save();
-            }
-        }
-
-        // Обновление weekly_hours для группы
-        $group = Group::find($this->group_id);
-        if ($group) {
-            $group->weekly_hours = max(0, $group->weekly_hours - (count($subjectIds) * 2));
-            $group->save();
-        }
-
-        session()->flash('message', 'Расписание успешно сохранено.');
-
-        // Редирект на страницу списка расписаний
-        return redirect()->route('schedules.index');
     }
 
     public function render()
     {
-        return view('livewire.schedules.schedule-form', [
-            'departments' => $this->departments,
-            'groups' => $this->groups,
-            'subjects' => $this->subjects,
-            'teachers' => $this->teachers,
-            'rooms' => $this->rooms,
-            'remainingHours' => $this->remainingHours,
-        ]);
+        return view('livewire.schedules.schedule-form');
     }
 }

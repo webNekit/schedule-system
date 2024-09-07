@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Group extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'department_id', 'weekly_hours'];
+    protected $fillable = ['name', 'department_id', 'weekly_hours', 'subjects_id'];
 
     // Связь с кафедрой
     public function department()
@@ -16,11 +16,24 @@ class Group extends Model
         return $this->belongsTo(Department::class);
     }
 
-    // Связь с дисциплинами
-    public function subjects()
+     public function subjects()
     {
-        return $this->belongsToMany(Subject::class, 'group_subjects');
+        return $this->hasMany(Subject::class, 'id', 'subjects_id');
     }
+    
+
+    // В модели Group
+public function getSubjectsAttribute()
+{
+    $subjectIds = json_decode($this->subjects_id, true); // Преобразуем JSON в массив
+
+    if (is_array($subjectIds)) {
+        return Subject::whereIn('id', $subjectIds)->get(); // Получаем дисциплины по массиву ID
+    }
+
+    return collect(); // Возвращаем пустую коллекцию, если массив пустой или не является массивом
+}
+
 
     // Связь с расписанием
     public function schedules()

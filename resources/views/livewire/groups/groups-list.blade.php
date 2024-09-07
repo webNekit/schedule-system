@@ -30,6 +30,7 @@
                     <tr>
                         <th class="py-2 px-4 border-b border-gray-200 text-left font-semibold text-gray-600">{{ __('Группа') }}</th>
                         <th class="py-2 px-4 border-b border-gray-200 text-left font-semibold text-gray-600">{{ __('Часов в неделю') }}</th>
+                        <th class="py-2 px-4 border-b border-gray-200 text-left font-semibold text-gray-600">{{ __('Дисциплины') }}</th>
                         <th class="py-2 px-4 border-b border-gray-200 text-left font-semibold text-gray-600">{{ __('Действия') }}</th>
                     </tr>
                 </thead>
@@ -38,6 +39,17 @@
                         <tr>
                             <td class="py-2 px-4 border-b border-gray-200">{{ $group->name }}</td>
                             <td class="py-2 px-4 border-b border-gray-200">{{ $group->weekly_hours }} ч.</td>
+                            <td class="py-2 px-4 border-b border-gray-200">
+                                @if($group->subjects && $group->subjects->isNotEmpty())
+                                    <select class="w-full  border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                        @foreach($group->subjects as $subject)
+                                            <option value="{{ $subject->id }}">{{ $subject->name }} - {{ $subject->total_hours }} часа</option>
+                                        @endforeach
+                                    </select>
+                                @else
+                                    <span class="text-gray-500">{{ __('Нет дисциплин') }}</span>
+                                @endif
+                            </td>
                             <td class="py-2 px-4 border-b border-gray-200">
                                 <a href="{{ route('groups.edit', $group->id) }}" class="text-yellow-500 hover:underline">{{ __('Редактировать') }}</a>
                                 <button wire:click="delete({{ $group->id }})" class="text-red-500 hover:underline ml-2">{{ __('Удалить') }}</button>
