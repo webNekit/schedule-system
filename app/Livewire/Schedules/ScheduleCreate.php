@@ -75,12 +75,12 @@ class ScheduleCreate extends Component
     public function updatedLessons($value)
     {
         $this->updateRemainingHours();
-        $this->updateSubjects(); // Обновляем список дисциплин при изменении пары
+        $this->updateSubjects();
     }
 
     public function updateSubjects()
     {
-        $semesterId = $this->determineCurrentSemester(); // Определяем текущий семестр
+        $semesterId = $this->determineCurrentSemester();
         if ($semesterId && $this->group_id) {
             $group = Group::find($this->group_id);
 
@@ -220,8 +220,6 @@ class ScheduleCreate extends Component
             'department_id' => $this->department_id,
             'group_id' => $this->group_id,
             'lesson_id' => $lesson->id,
-            'is_active' => $this->is_active,
-            'is_archive' => $this->is_archive,
         ]);
 
         session()->flash('message', 'Расписание успешно создано.');

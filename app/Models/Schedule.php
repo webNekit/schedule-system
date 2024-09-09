@@ -9,7 +9,8 @@ class Schedule extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'workday_id', 'department_id', 'group_id', 'lesson_id', 'is_active', 'is_archive'
+        'workday_id', 'department_id', 'group_id', 'lesson_id', 
+        // 'is_active', 'is_archive',
     ];
 
     public function workday()
